@@ -13,12 +13,19 @@ type UserServiceIf interface {
 	GetListUsers(page, limit int) ([]model.User, error)
 }
 
+type ItemServiceIf interface {
+	CreateItem(item model.Item) (model.Item, error)
+	UpdateItem(itemId int, input model.UpdateItem) (model.Item, error)
+}
+
 type Service struct {
 	UserServiceIf
+	ItemServiceIf
 }
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		UserServiceIf: NewUserService(repos.UserRepositoryIf),
+		ItemServiceIf: NewItemService(repos.ItemRepositoryIf),
 	}
 }

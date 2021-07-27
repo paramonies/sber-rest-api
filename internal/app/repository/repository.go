@@ -13,12 +13,19 @@ type UserRepositoryIf interface {
 	GetListUsers(page, limit int) ([]model.User, error)
 }
 
+type ItemRepositoryIf interface {
+	CreateItem(item model.Item) (model.Item, error)
+	UpdateItem(itemId int, item model.UpdateItem) (model.Item, error)
+}
+
 type Repository struct {
 	UserRepositoryIf
+	ItemRepositoryIf
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		UserRepositoryIf: NewUserRepository(db),
+		ItemRepositoryIf: NewItemRepository(db),
 	}
 }

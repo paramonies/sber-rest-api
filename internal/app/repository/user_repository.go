@@ -10,12 +10,6 @@ import (
 	"github.com/paramonies/sber-rest-api/internal/app/model"
 )
 
-const (
-	USERSTABLE     = "users"
-	ITEMSTABLE     = "items"
-	USERTYPESTABLE = "user_types"
-)
-
 type UserRepository struct {
 	db *sqlx.DB
 }
@@ -86,7 +80,7 @@ func (r *UserRepository) GetUserById(id int) (model.User, error) {
 func (r *UserRepository) UpdateUser(user model.UpdateUser) (model.User, error) {
 	emptyUser := model.User{}
 
-	userId, err := verifyIfUserExists(r, *(user.Id))
+	userId, err := verifyIfUserExists(r.db, *(user.Id))
 	if err != nil {
 		return emptyUser, err
 	}
@@ -171,7 +165,7 @@ func (r *UserRepository) UpdateUser(user model.UpdateUser) (model.User, error) {
 }
 
 func (r *UserRepository) DeleteUser(id int) error {
-	if _, err := verifyIfUserExists(r, id); err != nil {
+	if _, err := verifyIfUserExists(r.db, id); err != nil {
 		return err
 	}
 
@@ -261,24 +255,4 @@ func getUserResponse(r *UserRepository, id int) (model.User, error) {
 
 	userResponse.Items = listItems
 	return userResponse, nil
-}
-
-func verifyIfUserExists(r *UserRepository, id int) (int, error) {
-	findUserQuery := fmt.Sprintf("SELECT id FROM %s WHERE id = $1", USERSTABLE)
-	row := r.db.QueryRow(findUserQuery, id)
-	var userId int
-	if err := row.Scan(&userId); err != nil {
-		switch {
-		case err == sql.ErrNoRows:
-			return -1, fmt.Errorf("user with id %d not found", id)
-		default:
-			return -1, err
-		}
-	}
-	return userId, nil
-}
-
-func formatTime(timeStr string) string {
-	timeT, _ := time.Parse("2006-01-02T15:04:05Z", timeStr)
-	return timeT.Format("2006-01-02 15:04:05")
 }
